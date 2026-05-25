@@ -125,23 +125,7 @@ public class Message {
     }
 
     //JSON file storage
-    public void storeMessage() {
-
-        JSONObject obj = new JSONObject();
-
-        obj.put("messageID", messageID);
-        obj.put("recipient", recipient);
-        obj.put("message", messageText);
-
-        try (FileWriter fw = new FileWriter("messages.json", true)) {
-
-            fw.write(obj.toString());
-            fw.write(System.lineSeparator());
-
-        } catch (IOException e) {
-            System.out.println("Error storing message: " + e.getMessage());
-        }
-    }
+    
 
     //Total amount of messages
     public static int returnTotalMessages() {
