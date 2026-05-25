@@ -88,7 +88,14 @@ public class Message {
     }
 
     // ✔ RECIPIENT VALIDATION
-   
+    public String checkRecipientCell() {
+
+        if (recipient != null && recipient.matches("\\+\\d+")) {
+            return "Cell phone number successfully captured";
+        } else {
+            return "Cell phone number is incorrectly formatted or does not contain an international code.";
+        }
+    }
 
     //Sends message / Stores message / Disregards message 
     public String sentMessage(String option) {
