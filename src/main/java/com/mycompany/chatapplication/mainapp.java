@@ -59,7 +59,37 @@ if (response.equals("User registered successfully")) {
             System.out.println("2) Show recently sent messages");
             System.out.println("3) Quit");
 
-           
+            if (input.hasNextInt()) {
+                int choice = input.nextInt();
+                input.nextLine();
+                switch(choice){
+                    case 1:
+                        System.out.println("How many messages would you like to send?");
+                        int numMessages = input.nextInt();
+                        input.nextLine();
+
+                        for (int i = 0; i < numMessages; i++) {
+                            int messageNumber = i + 1;
+                            System.out.println("--- Message " + messageNumber + " ---");
+                            System.out.print("Enter message: ");
+                            String message = input.nextLine();
+                            System.out.println("Message sent: " + message);
+                        }
+                        break;
+                    case 2:
+                        System.out.println("Coming soon");
+                        break;
+                    case 3:
+                        loggedInPart2 = false;
+                        System.out.println("Goodbye!");
+                        break;
+                    default:
+                        System.out.println("Please choose 1, 2 or 3.");
+                }
+            } else {
+                System.out.println("Invalid input. Please enter numbers only.");
+                input.nextLine();
+            }
         }
     } else {
         System.out.println("Login failed. Program stopped.");
