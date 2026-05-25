@@ -77,7 +77,15 @@ public class Message {
     }
 
     //Checks message length
-   
+    public String checkMessageLength() {
+
+        if (messageText.length() <= 250) {
+            return "Message ready to send.";
+        } else {
+            int over = messageText.length() - 250;
+            return "Message exceeds 250 characters by " + over + " characters.";
+        }
+    }
 
     // ✔ RECIPIENT VALIDATION
     public String checkRecipientCell() {
