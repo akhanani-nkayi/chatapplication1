@@ -198,7 +198,33 @@ public class Message {
         }
     }
     
+    //Looks for recepient number displaying its stored messages
+    public static String searchByRecipient(String recipientNumber) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < recipients.size(); i++) {
+            if (recipients.get(i).equals(recipientNumber)) {
+                sb.append(storedMessages.get(i)).append("\n");
+            }
+        }
+        if (sb.length() == 0) return null;
+        return sb.toString().trim();
+    }
     
+    public static String deleteByMessageHash(String hash) {
+    int index = messageHashes.indexOf(hash);
+    String deleted = storedMessages.get(index);
+    if (index != -1) {
+        String deletedMessage = storedMessages.get(index);
+            storedMessages.remove(index);
+            messageHashes.remove(index);
+            messageIDs.remove(index);
+            recipients.remove(index); // removes from all arrays
+        System.out.println("Message with hash " + hash + " deleted.");
+    } else {
+        System.out.println("No message found with hash " + hash);
+        }
+        return "Message: " + deleted + " successfully deleted.";
+    }
     
     public static String displayFullReport() {//Gives report on every message sent to the recipient
     System.out.println("=== Report of Sent Messages ===");
