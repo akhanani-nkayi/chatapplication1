@@ -174,29 +174,7 @@ public class Message {
         }
     }
     
-    public static String displayLongestMessage() {
-    if (storedMessages.isEmpty()) {
-    return "No stored messages.";
-    }
-    String longest = storedMessages.get(0);
-    for (String msg : storedMessages) {//Counts the length of the messages stored and checks which is longer
-        if (msg.length() > longest.length()) {
-            longest = msg;
-        }
-    }
-    System.out.println("Longest message: " + longest);
-        return longest;
-    }
     
-    public static String searchByMessageID(String searchID) {
-    int index = messageIDs.indexOf(searchID);
-    if (index != -1) {
-        System.out.println("Message found:");
-        return storedMessages.get(index);
-        } else {
-            return null;
-        }
-    }
     
     //Looks for recepient number displaying its stored messages
     public static String searchByRecipient(String recipientNumber) {
