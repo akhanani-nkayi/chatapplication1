@@ -8,12 +8,23 @@ import java.util.Scanner;
 import org.json.JSONObject;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.io.BufferedReader;
+import java.io.FileReader;
 /**
  *
  * @author Student
  */
 public class Message {
-
+    
+    private static List<String> sentMessages = new ArrayList<>();
+    private static List<String> disregardedMessages = new ArrayList<>();
+    private static List<String> storedMessages = new ArrayList<>();        
+    private static List<String> messageHashes = new ArrayList<>();
+    private static List<String> messageIDs = new ArrayList<>();
+    private static List<String> recipients = new ArrayList<>();
+    
     private String messageID;
     private int messageNumber;
     private String recipient;
@@ -52,15 +63,14 @@ public class Message {
 
     //Hash Creation
     public String createMessageHash() {
-
         String idPart = messageID.substring(0, 2);
 
         String msgNum = String.valueOf(messageNumber);
 
         String[] words = messageText.split(" ");
 
-        String firstWord = words[0];
-        String lastWord = words[words.length - 1];
+        String firstWord = words[0].replaceAll("[^a-zA-Z0-9]","");
+        String lastWord = words[words.length - 1].replaceAll("[^a-zA-Z0-9]","");
 
         String hash = idPart + ":" + msgNum + ":" + firstWord + lastWord;
 
@@ -78,7 +88,6 @@ public class Message {
 
     //Checks message length
     public String checkMessageLength() {
-
         if (messageText.length() <= 250) {
             return "Message ready to send.";
         } else {
@@ -89,7 +98,6 @@ public class Message {
 
     // ✔ RECIPIENT VALIDATION
     public String checkRecipientCell() {
-
         if (recipient != null && recipient.matches("\\+\\d+")) {
             return "Cell phone number successfully captured";
         } else {
@@ -99,20 +107,26 @@ public class Message {
 
     //Sends message / Stores message / Disregards message 
     public String sentMessage(String option) {
-
         if (option.equalsIgnoreCase("Send")) {
+            sentMessages.add(messageText);
+            messageHashes.add(messageHash);
+            messageIDs.add(messageID);
             return "Message successfully sent.";
         }
 
         if (option.equalsIgnoreCase("Disregard")) {
+            disregardedMessages.add(messageText);
             return "Press 0 to delete the message.";
         }
 
         if (option.equalsIgnoreCase("Store")) {
             storeMessage();
+            storedMessages.add(messageText);
+            sentMessages.add(messageText);
+            messageHashes.add(messageHash);
+            messageIDs.add(messageID);
             return "Message successfully stored.";
         }
-
         return "Invalid option.";
     }
 
@@ -126,10 +140,11 @@ public class Message {
 
     //JSON file storage
     public void storeMessage() {
-
         JSONObject obj = new JSONObject();
 
         obj.put("messageID", messageID);
+        obj.put("messageNumber", messageNumber);
+        obj.put("messageHash", messageHash);
         obj.put("recipient", recipient);
         obj.put("message", messageText);
 
@@ -147,4 +162,114 @@ public class Message {
     public static int returnTotalMessages() {
         return totalMessage;
     }
+    
+    public static void displayStoredMessages() {//Goes to the stored messages and displys them
+    if (storedMessages.isEmpty()) {
+        System.out.println("There are no stored messages.");
+        return;
+    }
+    System.out.println("=== Stored Messages ===");
+    for (String msg : storedMessages) {
+        System.out.println(msg);
+        }
+    }
+    
+    public static String displayLongestMessage() {
+    if (storedMessages.isEmpty()) {
+    return "No stored messages.";
+    }
+    String longest = storedMessages.get(0);
+    for (String msg : storedMessages) {//Counts the length of the messages stored and checks which is longer
+        if (msg.length() > longest.length()) {
+            longest = msg;
+        }
+    }
+    System.out.println("Longest message: " + longest);
+        return longest;
+    }
+    
+    public static String searchByMessageID(String searchID) {
+    int index = messageIDs.indexOf(searchID);
+    if (index != -1) {
+        System.out.println("Message found:");
+        return storedMessages.get(index);
+        } else {
+            return null;
+        }
+    }
+    
+    //Looks for recepient number displaying its stored messages
+    public static String searchByRecipient(String recipientNumber) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < recipients.size(); i++) {
+            if (recipients.get(i).equals(recipientNumber)) {
+                sb.append(storedMessages.get(i)).append("\n");
+            }
+        }
+        if (sb.length() == 0) return null;
+        return sb.toString().trim();
+    }
+    
+    public static String deleteByMessageHash(String hash) {
+    int index = messageHashes.indexOf(hash);
+    String deleted = storedMessages.get(index);
+    if (index != -1) {
+        String deletedMessage = storedMessages.get(index);
+            storedMessages.remove(index);
+            messageHashes.remove(index);
+            messageIDs.remove(index);
+            recipients.remove(index); // removes from all arrays
+        System.out.println("Message with hash " + hash + " deleted.");
+    } else {
+        System.out.println("No message found with hash " + hash);
+        }
+        return "Message: " + deleted + " successfully deleted.";
+    }
+    
+    public static String displayFullReport() {//Gives report on every message sent to the recipient
+    System.out.println("=== Report of Sent Messages ===");
+    for (int i = 0; i < sentMessages.size(); i++) {
+        System.out.println("Message #" + (i + 1));
+        System.out.println("Recipient: " + "TODO: recipient here");
+        System.out.println("Hash: " + messageHashes.get(i));
+        System.out.println("Text: " + sentMessages.get(i));
+        System.out.println("-----------------------------");
+        }
+        return null;
+    }   
+    
+    // Attribution: org.json library - https://mvnrepository.com/artifact/org.json/json
+    public static void loadStoredMessages() {
+    storedMessages.clear(); // Prevents duplicates when loading again
+        try (BufferedReader br = new BufferedReader(new FileReader("messages.json"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                JSONObject obj = new JSONObject(line);
+                // Retrieve the message text from JSON
+                String messageText = obj.getString("message");
+                String recipient = obj.getString("recipient");
+                storedMessages.add(messageText);
+                recipients.add(recipient);
+            }
+        } catch (IOException e) {
+        // File may not exist yet on first run
+        System.out.println("No stored messages file found yet.");
+        }
+    }
+    
+    public static String[] getSentMessages() { //Gets input sent messages from array
+    return sentMessages.toArray(new String[0]);
+    }
+    
+    public static void clearData() {
+    sentMessages.clear();
+        storedMessages.clear();
+        disregardedMessages.clear();
+        messageHashes.clear();
+        messageIDs.clear();
+        recipients.clear();
+        totalMessage = 0;
+    }
+    
+    
 }
